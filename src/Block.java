@@ -7,7 +7,8 @@ import java.security.MessageDigest;
 
 public class Block {
     //Block data
-    private String data;
+    private int data;
+    private int index;
     private String previousHash;
     private BigInteger nonce;
     private String sender;
@@ -17,6 +18,14 @@ public class Block {
     //External entities used for block service
     private String currentHash;
     private String hash;
+
+    public int getIndex() {
+        return index;
+    }
+
+    public void setIndex(int index) {
+        this.index = index;
+    }
 
     public String getHash() {
         return hash;
@@ -34,11 +43,11 @@ public class Block {
         this.currentHash = currentHash;
     }
 
-    public String getData() {
+    public int getData() {
         return data;
     }
 
-    public void setData(String data) {
+    public void setData(int data) {
         this.data = data;
     }
 
@@ -74,7 +83,7 @@ public class Block {
         this.recipient = recipient;
     }
 
-    public Block(String data, String previousHash, BigInteger nonce, String sender, String recipient) {
+    public Block(int data, String previousHash, BigInteger nonce, String sender, String recipient) {
         this.data = data;
         this.previousHash = previousHash;
         this.nonce = nonce;
@@ -86,7 +95,7 @@ public class Block {
     }
 
     public String str_to_ComputeHash(Block block){
-        String str=block.getData().toString()+block.getPreviousHash().toString()+block.getNonce().toString()+block.getSender().toString()+
+        String str=block.getData()+block.getPreviousHash().toString()+block.getNonce().toString()+block.getSender().toString()+
                 block.getRecipient().toString();
         return  str;
     }

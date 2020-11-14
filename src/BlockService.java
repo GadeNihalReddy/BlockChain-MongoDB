@@ -1,9 +1,11 @@
-import org.json.JSONArray;
+import org.bson.Document;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONTokener;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.math.BigInteger;
 import java.util.LinkedHashMap;
@@ -20,15 +22,18 @@ public class BlockService {
     public int difficulty;
     public List<Integer> difficulties=new LinkedList<>();
     public List<String> list=new LinkedList<>();
+    public Document doc;
+
     //Genesis Block
    public void block_genesis() {
-        Block genesis = new Block("Genesis Block", "", i, "", "");
+        Block genesis = new Block(0, "", i, "", "");
         difficulty=2;//default for genesis block
         currentHash=genesis.chain_MineBlock(genesis,difficulty);
         chainHash=currentHash;
         genesis.setCurrentHash(currentHash);
         list.add(genesis.block_as_JSON(genesis));
         difficulties.add(difficulty);
+
     }
 
     public void addTransaction(){
@@ -36,7 +41,7 @@ public class BlockService {
 
         try {
             System.out.println("Data");
-            String data1=br.readLine();
+            int data1= Integer.parseInt(br.readLine());
             System.out.println("sender");
             String sender1=br.readLine();
             System.out.println("Recipient");
@@ -120,7 +125,7 @@ public class BlockService {
             }
             else {
                 System.out.println("Enter new Data(If Empty.. data will not be Changed)");
-                String data2 = br.readLine();
+                int data2 = br.read();
                 System.out.println("Enter new Sender(If Empty.. sender will not be Changed)");
                 String sender2 = br.readLine();
                 System.out.println("Enter new Recipient(If Empty.. recipient will not be Changed)");
@@ -128,7 +133,7 @@ public class BlockService {
 
                 Block blk_curpt=Block.getBlock(list.get(blk_id));
 
-                if(!is_Value_Empty(data2)){
+                if(!is_Value_Empty(String.valueOf(data2))){
                     blk_curpt.setData(data2);
                 }
                 if(!is_Value_Empty(sender2)){
@@ -176,47 +181,45 @@ public class BlockService {
             e.printStackTrace();
         }
     }
-
-    public void validity() {
-       //text file data is imported to loacl fields and compared with jvm values
-       System.out.println("Enter the text file name to import(Ignore file extension)");
-        try {
-            BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-            JSONObject jo=new JSONObject(new JSONTokener(new FileReader(br.readLine()+".txt")));
-            JSONArray array =(JSONArray)jo.get("blockchain");
-            String chnHsh=(String)jo.get("chainHash");
-            List<String> bloc = new LinkedList<>();
-            for(int i=0; i<array.length();i++) {
-                bloc.add(array.get(i).toString());
-            }
-            if(bloc.size()!=list.size()){
-                System.out.println("Block Chains are of Different size");
-            }
-            else{
-                boolean isValid =true;
-                for(int i=0;i<bloc.size();i++){
-                    if(!bloc.get(i).equals(list.get(i))){
-                        isValid=false;
-                        System.out.println("Block Chains Vary at index:"+i);
-                        break;
-                    }
-                }
-                if(!chnHsh.equals(chainHash)){
-                    isValid=false;
-                    System.out.println("Blocks differ at Final Block ");
-                }
-                if(isValid){
-                    System.out.println("Block chains are Equivalent or Similar");
-                }
-            }
-        } catch (IOException e) {
-            System.out.println("File Not Found");
-        }catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-    }
-
+//    public void validity() {
+//       //text file data is imported to loacl fields and compared with jvm values
+//       System.out.println("Enter the text file name to import(Ignore file extension)");
+//        try {
+//            BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+//            JSONObject jo=new JSONObject(new JSONTokener(new FileReader(br.readLine()+".txt")));
+//            JSONArray array =(JSONArray)jo.get("blockchain");
+//            String chnHsh=(String)jo.get("chainHash");
+//            List<String> bloc = new LinkedList<>();
+//            for(int i=0; i<array.length();i++) {
+//                bloc.add(array.get(i).toString());
+//            }
+//            if(bloc.size()!=list.size()){
+//                System.out.println("Block Chains are of Different size");
+//            }
+//            else{
+//                boolean isValid =true;
+//                for(int i=0;i<bloc.size();i++){
+//                    if(!bloc.get(i).equals(list.get(i))){
+//                        isValid=false;
+//                        System.out.println("Block Chains Vary at index:"+i);
+//                        break;
+//                    }
+//                }
+//                if(!chnHsh.equals(chainHash)){
+//                    isValid=false;
+//                    System.out.println("Blocks differ at Final Block ");
+//                }
+//                if(isValid){
+//                    System.out.println("Block chains are Equivalent or Similar");
+//                }
+//            }
+//        } catch (IOException e) {
+//            System.out.println("File Not Found");
+//        }catch (JSONException e) {
+//            e.printStackTrace();
+//        }
+//
+//    }
     public void adjustDifficulty() {
        //stating current difficulty
         System.out.println("Current Difficulty is : "+difficulty);
