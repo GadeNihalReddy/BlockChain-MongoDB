@@ -1,4 +1,3 @@
-import org.bson.Document;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -6,12 +5,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.lang.reflect.Field;
 import java.math.BigInteger;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Scanner;
 
 public class BlockService {
 
@@ -22,58 +18,64 @@ public class BlockService {
     public int difficulty;
     public List<Integer> difficulties=new LinkedList<>();
     public List<String> list=new LinkedList<>();
-    public Document doc;
+
+    public int idx=0;
 
     //Genesis Block
-   public void block_genesis() {
-        Block genesis = new Block(0, "", i, "", "");
+   public String block_genesis() {
+
         difficulty=2;//default for genesis block
+        Block genesis = new Block(0, "", i, "", "",difficulty,idx);
         currentHash=genesis.chain_MineBlock(genesis,difficulty);
         chainHash=currentHash;
         genesis.setCurrentHash(currentHash);
         list.add(genesis.block_as_JSON(genesis));
         difficulties.add(difficulty);
-
+        return genesis.block_as_JSON(genesis);
+//        MongoDB mdb=new MongoDB();
+//        mdb.doc= Document.parse(genesis.block_as_JSON(genesis));
+//        mdb.collection.insertOne(mdb.doc);
     }
 
-    public void addTransaction(){
+    public String addTransaction(){
         BufferedReader br=new BufferedReader(new InputStreamReader(System.in));
 
         try {
-            System.out.println("Data");
+            System.out.println("Enter Data");
             int data1= Integer.parseInt(br.readLine());
-            System.out.println("sender");
+            System.out.println("Enter sender");
             String sender1=br.readLine();
-            System.out.println("Recipient");
+            System.out.println("Enter Recipient");
             String recipient1=br.readLine();
+            System.out.println("Enter Difficulty");
+            int difficulty=Integer.parseInt(br.readLine());
             i=i.add(BigInteger.ONE);
             String previousHash=currentHash;
-            Block blk=new Block(data1,previousHash,i,sender1,recipient1);
+            idx=idx+1;
+            Block blk=new Block(data1,previousHash,i,sender1,recipient1,difficulty,idx);
             currentHash=blk.chain_MineBlock(blk,difficulty);
             blk.setCurrentHash(currentHash);
             chainHash=currentHash;
             list.add(blk.block_as_JSON(blk));
             difficulties.add(difficulty);
+            return blk.block_as_JSON(blk);
+//            MongoDB mdb=new MongoDB();
+//            mdb.doc= Document.parse(blk.block_as_JSON(blk));
+//            mdb.collection.insertOne(mdb.doc);
 
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
-
+        return "null";
     }
 
     public JSONObject viewBlock(){
         JSONObject jsn=new JSONObject();
         try {
-            Field changeMap =jsn.getClass().getDeclaredField("map");
-            changeMap.setAccessible(true);
-            changeMap.set(jsn, new LinkedHashMap<>());
-            changeMap.setAccessible(false);
-            jsn.put("chainHash",chainHash);
-            jsn.put("difficulty",difficulties);
             jsn.put("blockchain", list);
             return jsn;
             //return jsn.toString();
-        } catch (JSONException | NoSuchFieldException | IllegalAccessException e) {
+        } catch (JSONException e) {
             System.out.println("There is an Error in JSON values, they may be not in proper JSON format");
             System.out.println(e.getMessage());
         }
@@ -181,58 +183,7 @@ public class BlockService {
             e.printStackTrace();
         }
     }
-//    public void validity() {
-//       //text file data is imported to loacl fields and compared with jvm values
-//       System.out.println("Enter the text file name to import(Ignore file extension)");
-//        try {
-//            BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-//            JSONObject jo=new JSONObject(new JSONTokener(new FileReader(br.readLine()+".txt")));
-//            JSONArray array =(JSONArray)jo.get("blockchain");
-//            String chnHsh=(String)jo.get("chainHash");
-//            List<String> bloc = new LinkedList<>();
-//            for(int i=0; i<array.length();i++) {
-//                bloc.add(array.get(i).toString());
-//            }
-//            if(bloc.size()!=list.size()){
-//                System.out.println("Block Chains are of Different size");
-//            }
-//            else{
-//                boolean isValid =true;
-//                for(int i=0;i<bloc.size();i++){
-//                    if(!bloc.get(i).equals(list.get(i))){
-//                        isValid=false;
-//                        System.out.println("Block Chains Vary at index:"+i);
-//                        break;
-//                    }
-//                }
-//                if(!chnHsh.equals(chainHash)){
-//                    isValid=false;
-//                    System.out.println("Blocks differ at Final Block ");
-//                }
-//                if(isValid){
-//                    System.out.println("Block chains are Equivalent or Similar");
-//                }
-//            }
-//        } catch (IOException e) {
-//            System.out.println("File Not Found");
-//        }catch (JSONException e) {
-//            e.printStackTrace();
-//        }
-//
-//    }
-    public void adjustDifficulty() {
-       //stating current difficulty
-        System.out.println("Current Difficulty is : "+difficulty);
-        System.out.println("Enter a difficulty from [1-7]");
-        Scanner sc = new Scanner(System.in);
-        int dif=sc.nextInt();
-        while(dif<1 || dif>7){
-            System.out.println("Enter difficulty range from [1-7] only");
-            dif=sc.nextInt();
-        }
-            difficulty=dif;
-            System.out.println("Current Difficulty is: "+difficulty);
-    }
+
 
     public boolean is_Value_Empty(String str){
         return str == null || str.trim().length()<1;

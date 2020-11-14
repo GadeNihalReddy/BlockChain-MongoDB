@@ -2,8 +2,10 @@ import com.google.gson.GsonBuilder;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.reflect.Field;
 import java.math.BigInteger;
 import java.security.MessageDigest;
+import java.util.LinkedHashMap;
 
 public class Block {
     //Block data
@@ -13,6 +15,7 @@ public class Block {
     private BigInteger nonce;
     private String sender;
     private String recipient;
+    private int difficulty;
 
 
     //External entities used for block service
@@ -83,12 +86,22 @@ public class Block {
         this.recipient = recipient;
     }
 
-    public Block(int data, String previousHash, BigInteger nonce, String sender, String recipient) {
+    public int getDifficulty() {
+        return difficulty;
+    }
+
+    public void setDifficulty(int difficulty) {
+        this.difficulty = difficulty;
+    }
+
+    public Block(int data,String previousHash, BigInteger nonce, String sender, String recipient, int difficulty,int index) {
         this.data = data;
         this.previousHash = previousHash;
         this.nonce = nonce;
         this.sender = sender;
         this.recipient = recipient;
+        this.difficulty = difficulty;
+        this.index = index;
     }
 
     public Block() {
@@ -132,14 +145,22 @@ public class Block {
 
     public static String block_as_JSON(Block block){
         JSONObject jsn=new JSONObject();
+        //MongoDB mongo = new MongoDB();
         try {
+            Field changeMap =jsn.getClass().getDeclaredField("map");
+            changeMap.setAccessible(true);
+            changeMap.set(jsn, new LinkedHashMap<>());
+            changeMap.setAccessible(false);
             jsn.put("data",block.getData());
             jsn.put("previousHash",block.getPreviousHash());
             jsn.put("nonce",block.getNonce());
             jsn.put("sender",block.getSender());
             jsn.put("recipient",block.getRecipient());
+            jsn.put("difficulty",block.getDifficulty());
+            jsn.put("index",block.getIndex());
+           // mongo.collection.insertOne(Document.parse(jsn.toString()));
             return jsn.toString();
-        } catch (JSONException e) {
+        } catch (JSONException | NoSuchFieldException | IllegalAccessException e) {
             System.out.println(e.getMessage());
         }
         return null;

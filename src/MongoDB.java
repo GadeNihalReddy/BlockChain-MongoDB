@@ -18,6 +18,7 @@ public class MongoDB {
     public MongoClient mongoClient;
     public MongoDatabase database;
     public MongoCollection<Document> collection;
+    public Document doc=new Document();
 
     public void connectDB() {
         try {
