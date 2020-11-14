@@ -1,0 +1,4 @@
+{
+    "dbconnect": "mongodb+srv://test:test@mycluster.yrox3.mongodb.net/Mycluster?retryWrites=true&w=majority",
+    "collection": "test"
+}
